@@ -7,7 +7,7 @@ const SUBJECTS = [
 ];
 
 const USERS = {
-  "9151701": { password:"91517001", dob:"05-07-2000", name:"Deepanshu Yadav", hindu:20, ca:20, desc:28, weeklyH:55, weeklyCA:62, email:"deepanshu@example.com" },
+  "9151701": { password:"91517001", dob:"05-07-2000", name:"Deepanshu Yadav", hindu:20, ca:20, desc:28, weeklyH:55, weeklyCA:62, email:"purab100yadav@gmail.com" },
   "8504002": { password:"85040002", dob:"25-11-2004", name:"Nikita Soni", hindu:18, ca:11, desc:18, weeklyH:42, weeklyCA:40, email:"nikita@example.com" },
   "8756203": { password:"87562003", dob:"10-08-2002", name:"Jyoti Yadav", hindu:19, ca:18, desc:25, weeklyH:48, weeklyCA:52, email:"jyoti@example.com" },
   "6001104": { password:"60011004", dob:"29-11-1999", name:"Priyanka Dev", hindu:17, ca:16, desc:20, weeklyH:46, weeklyCA:45, email:"priyanka@example.com" },
@@ -17,7 +17,8 @@ const USERS = {
   "8534808": { password:"85348008", dob:"06-06-2002", name:"Shweta Yadav", hindu:8, ca:13, desc:14, weeklyH:30, weeklyCA:35, email:"shweta@example.com" }
 };
 
-let chart;
+let chart = null;
+let currentRoll = null;
 
 function getTotal(u){
   return SUBJECTS.reduce((s,x)=>s+(u[x.key]||0),0);
@@ -27,71 +28,84 @@ function login(){
   const roll = document.getElementById("roll").value.trim();
   const pass = document.getElementById("password").value.trim();
   const dob = document.getElementById("dob").value.trim();
-  if(!USERS[roll] || USERS[roll].password!==pass || USERS[roll].dob!==dob){
-    error.textContent = "Invalid credentials";
+  const errorEl = document.getElementById("error");
+
+  if(!USERS[roll] || USERS[roll].password !== pass || USERS[roll].dob !== dob){
+    errorEl.textContent = "Invalid credentials. Please check Roll No, Password, and DOB.";
     return;
   }
-  error.textContent = "";
+  errorEl.textContent = "";
+  currentRoll = roll;
   showResult(roll);
 }
 
 function showResult(roll){
   const u = USERS[roll];
-  loginCard.style.display="none";
-  resultCard.style.display="block";
+  document.getElementById("loginCard").style.display = "none";
+  document.getElementById("resultCard").style.display = "block";
 
-  name.textContent = u.name;
-  rollShow.textContent = roll;
+  document.getElementById("name").textContent = u.name;
+  document.getElementById("rollShow").textContent = roll;
 
-  const sorted = Object.entries(USERS).sort((a,b)=>getTotal(b[1])-getTotal(a[1]));
-  const rank = sorted.findIndex(x=>x[0]===roll)+1;
-  rankEl.textContent = rank;
+  const sorted = Object.entries(USERS).sort((a,b)=>getTotal(b[1]) - getTotal(a[1]));
+  const rank = sorted.findIndex(x => x[0] === roll) + 1;
+  document.getElementById("rank").textContent = rank;
 
-  const topperBadge = document.getElementById("topperBadge");
-  const medalTag = document.getElementById("medalTag");
-  const certBtn = document.getElementById("certBtn");
+  // Topper & medals
+  document.getElementById("topperBadge").style.display = rank === 1 ? "inline-block" : "none";
+  const medalEl = document.getElementById("medalTag");
+  if(rank === 1) medalEl.textContent = "🥇 Gold Performer";
+  else if(rank === 2) medalEl.textContent = "🥈 Silver Performer";
+  else if(rank === 3) medalEl.textContent = "🥉 Bronze Performer";
+  else medalEl.textContent = "";
 
-  topperBadge.style.display = rank===1 ? "inline-block" : "none";
+  document.getElementById("certBtn").style.display = rank <= 3 ? "inline-block" : "none";
 
-  if(rank===1) medalTag.textContent="🥇 Gold Performer";
-  else if(rank===2) medalTag.textContent="🥈 Silver Performer";
-  else if(rank===3) medalTag.textContent="🥉 Bronze Performer";
-  else medalTag.textContent="";
-
-  certBtn.style.display = rank<=3 ? "inline-block" : "none";
-
-  let table = `<tr><th>Subject</th><th>Marks</th><th>Cut-off</th><th>Status</th></tr>`;
-  let labels=[], data=[];
-  SUBJECTS.forEach(s=>{
+  // Table
+  let tableHTML = `<tr><th>Subject</th><th>Marks</th><th>Cut-off</th><th>Status</th></tr>`;
+  let labels = [], data = [];
+  SUBJECTS.forEach(s => {
     const scored = u[s.key];
-    const pass = scored>=s.cutoff;
-    table+=`<tr class="${pass?'green':'red'}">
-      <td>${s.name}</td>
-      <td>${scored}/${s.total} ${!pass?'⭐':''}</td>
-      <td>${s.cutoff}</td>
-      <td>${pass?'Pass':'Fail'}</td>
-    </tr>`;
+    const pass = scored >= s.cutoff;
+    tableHTML += `
+      <tr class="${pass ? 'green' : 'red'}">
+        <td>${s.name}</td>
+        <td>${scored}/${s.total} ${!pass ? '⭐' : ''}</td>
+        <td>${s.cutoff}</td>
+        <td>${pass ? 'Pass' : 'Fail'}</td>
+      </tr>
+    `;
     labels.push(s.name);
     data.push(scored);
   });
-  marksTable.innerHTML = table;
+  document.getElementById("marksTable").innerHTML = tableHTML;
 
-  const totalQ = 20+20+2+60+60;
+  // Attempt summary & accuracy
+  const totalQ = 20 + 20 + 2 + 60 + 60; // 162
   const correct = u.hindu + u.ca + u.weeklyH + u.weeklyCA;
-  const attempted = totalQ;
+  const attempted = totalQ; // assuming attempted all
   const wrong = totalQ - correct;
-  const accuracy = ((correct/attempted)*100).toFixed(2);
+  const accuracy = ((correct / attempted) * 100).toFixed(2);
 
-  totalQEl.textContent = totalQ;
-  attemptedEl.textContent = attempted;
-  correctEl.textContent = correct;
-  wrongEl.textContent = wrong;
-  accuracyEl.textContent = accuracy;
+  document.getElementById("totalQ").textContent = totalQ;
+  document.getElementById("attempted").textContent = attempted;
+  document.getElementById("correct").textContent = correct;
+  document.getElementById("wrong").textContent = wrong;
+  document.getElementById("accuracy").textContent = accuracy;
 
+  // Chart
   if(chart) chart.destroy();
-  chart = new Chart(barChart,{type:'bar',data:{labels,datasets:[{data}]}});
-
-  window.currentUser = roll;
+  chart = new Chart(document.getElementById("barChart"), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: "Marks", data }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
 }
 
 function downloadPDF(){
@@ -99,26 +113,28 @@ function downloadPDF(){
 }
 
 function downloadCertificate(){
-  const roll = window.currentUser;
+  const roll = currentRoll;
   const u = USERS[roll];
-  const sorted = Object.entries(USERS).sort((a,b)=>getTotal(b[1])-getTotal(a[1]));
-  const rank = sorted.findIndex(x=>x[0]===roll)+1;
+  const sorted = Object.entries(USERS).sort((a,b)=>getTotal(b[1]) - getTotal(a[1]));
+  const rank = sorted.findIndex(x => x[0] === roll) + 1;
+
   const cert = document.createElement("div");
+  cert.style.padding = "40px";
   cert.innerHTML = `
     <h1 style="text-align:center;">Certificate of Excellence</h1>
     <p style="text-align:center;font-size:18px;">
-      This is to certify that <b>${u.name}</b> has secured
-      <b>Rank ${rank}</b> in the Weekly Test Series.
+      This is to certify that <b>${u.name}</b> has secured <b>Rank ${rank}</b>
+      in the Weekly Test Series.
     </p>
     <p style="text-align:right;margin-top:60px;">Authorized Signatory<br><b>Deepanshu Yadav</b></p>
   `;
-  html2pdf().from(cert).save(`Certificate_Rank_${rank}.pdf`);
+  html2pdf().from(cert).save(\`Certificate_Rank_\${rank}.pdf\`);
 }
 
 function emailResult(){
-  const roll = window.currentUser;
-  const u = USERS[roll];
-  window.location.href = `mailto:${u.email}?subject=Your Scorecard&body=Hi ${u.name},%0D%0AYour Rank: ${rankEl.textContent}`;
+  const u = USERS[currentRoll];
+  const rank = document.getElementById("rank").textContent;
+  window.location.href = \`mailto:${u.email}?subject=Your Scorecard&body=Hi ${u.name},%0D%0AYour Rank: ${rank}\`;
 }
 
 function logout(){
