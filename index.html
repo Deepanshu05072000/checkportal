@@ -12,37 +12,31 @@
   <div class="header">🏫 Deepanshu Yadav – Online Result Portal</div>
 
   <div class="container">
+    <!-- Login -->
     <div class="content" id="loginCard">
-      <div class="sub">Enter Roll Number, Password & DOB</div>
-      <div class="form-row"><label>Roll Number</label><input id="roll"></div>
-      <div class="form-row"><label>Password</label><input id="password" type="password"></div>
-      <div class="form-row"><label>DOB</label><input id="dob" placeholder="DD-MM-YYYY"></div>
+      <h3>View Your Result</h3>
+      <input id="roll" placeholder="Roll Number">
+      <input id="password" type="password" placeholder="Password">
+      <input id="dob" placeholder="DOB (DD-MM-YYYY)">
       <button class="btn" onclick="login()">Submit</button>
-      <div id="error" class="error"></div>
+      <p id="error" class="error"></p>
     </div>
 
+    <!-- Result -->
     <div class="content" id="resultCard" style="display:none;">
-      <div id="statusBadge" class="badge"></div>
+      <div id="topperBadge" class="topperBadge" style="display:none;">🏆 TOPPER</div>
+      <div id="medalTag" class="medal"></div>
 
       <div id="marksheet">
-        <h2 class="center">Official Scorecard</h2>
+        <h2>Official Scorecard</h2>
+        <p><b>Name:</b> <span id="name"></span></p>
+        <p><b>Roll No:</b> <span id="rollShow"></span></p>
+        <p><b>Rank:</b> <span id="rank"></span></p>
 
-        <div class="box">
-          <h3>Candidate Details</h3>
-          <p><b>Name:</b> <span id="name"></span></p>
-          <p><b>Roll No:</b> <span id="rollShow"></span></p>
-          <p><b>Rank:</b> <span id="rank"></span></p>
-          <p><b>Percentile:</b> <span id="percentile"></span></p>
-        </div>
+        <table id="marksTable"></table>
+        <canvas id="barChart"></canvas>
 
-        <div class="box">
-          <h3>Section-wise Marks</h3>
-          <table id="marksTable"></table>
-          <canvas id="barChart" height="140"></canvas>
-        </div>
-
-        <div class="box">
-          <h3>Attempt Summary</h3>
+        <div class="summary">
           <p>Total Questions: <b id="totalQ"></b></p>
           <p>Attempted: <b id="attempted"></b></p>
           <p>Correct: <b id="correct"></b></p>
@@ -56,7 +50,11 @@
         </div>
       </div>
 
-      <button class="btn" onclick="downloadPDF()">📥 Download Marksheet (PDF)</button>
+      <button class="btn" onclick="downloadPDF()">📥 Download Scorecard PDF</button>
+      <button class="btn secondary" id="certBtn" onclick="downloadCertificate()" style="display:none;">
+        🏅 Download Certificate
+      </button>
+      <button class="btn secondary" onclick="emailResult()">📧 Email Scorecard</button>
       <button class="btn secondary" onclick="logout()">Logout</button>
     </div>
 
@@ -66,4 +64,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
